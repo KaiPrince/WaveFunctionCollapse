@@ -12,9 +12,9 @@ class WaveFunctionCollapse:
     def __init__(self, board: Board):
         self.board = board
 
-    def solve(self):
+    def solve(self) -> Board:
         # Initialize the wave in the completely unobserved state, i.e. with all the boolean coefficients being true.
-        # wave = self.initialize_wave()
+        wave = self.initialize_wave()
 
         # Repeat the following steps:
         # Observation:
@@ -29,12 +29,10 @@ class WaveFunctionCollapse:
                 if self.board.is_collapsed(i, j):
                     continue
 
-                self.observe_cell(i, j)
-
-                is_invalid = self.board.cell_is_invalid(i, j)
-                if is_invalid:
-                    self.board.revert()
-                    continue
+                cell_collapsed = self.observe_cell(i, j)
+                if not cell_collapsed:
+                    # Failure
+                    raise NotImplementedError
 
                 # TODO propagate
                 # TODO backtrack
@@ -47,21 +45,27 @@ class WaveFunctionCollapse:
 
         return self.board
 
-    def initialize_wave(self):
+    def initialize_wave(self) -> list[list[int]]:
         wave: list = np.full([self.board.width, self.board.height], 0).tolist()
         for i, row in enumerate(wave):
             for j, col in enumerate(row):
                 wave[i][j] = self.get_entropy(i, j)
         return wave
 
-    def get_entropy(self, row_index, col_index):
+    def get_entropy(self, row_index: int, col_index: int) -> int:
         if self.board.is_collapsed(row_index, col_index):
             return MIN_ENTROPY
         else:
             return len(self.board.compute_possible_states(row_index, col_index))
 
-    def observe_cell(self, row_index: int, col_index: int):
+    def observe_cell(self, row_index: int, col_index: int) -> bool:
         possible_states = self.board.compute_possible_states(row_index, col_index)
-        new_value = possible_states.pop()
-        self.board.set_cell(row_index, col_index, new_value)
-        return self.board
+        for state in possible_states:
+            self.board.set_cell(row_index, col_index, state)
+
+            is_invalid = self.board.cell_is_invalid(row_index, col_index)
+            if not is_invalid:
+                return True
+            self.board.revert()
+
+        return False
