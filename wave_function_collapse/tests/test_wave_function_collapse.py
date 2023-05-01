@@ -57,6 +57,30 @@ def test_solve(build_wave_function_collapse):
     assert solution == sudoku_board
 
 
+@pytest.mark.skip("todo")
+def test_solve_fails(build_wave_function_collapse):
+    # Arrange
+    board: BoardData = np.full([9, 9], 1).tolist()
+    board[3][3] = None
+    wave_function_collapse = build_wave_function_collapse(board)
+
+    # Act
+    with pytest.raises(NotImplementedError):
+        wave_function_collapse.solve()
+
+    # Assert
+
+
+def test_solve_empty_board(build_wave_function_collapse):
+    # Arrange
+    wave_function_collapse = build_wave_function_collapse(empty_board)
+
+    # Act
+    solution = wave_function_collapse.solve()
+
+    # Assert
+
+
 @pytest.mark.parametrize(
     "board, expected",
     [

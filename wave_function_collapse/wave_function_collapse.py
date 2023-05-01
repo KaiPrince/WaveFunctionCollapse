@@ -24,11 +24,14 @@ class WaveFunctionCollapse:
         #   Collapse this element into a definite state according to its coefficients and the distribution of NxN
         #   patterns in the input.
         # Propagation: propagate information gained on the previous observation step.
+
+        # ..Find a cell to collapse
         for i in range(Board.width):
             for j in range(Board.height):
                 if self.board.is_collapsed(i, j):
                     continue
 
+                # .. collapse the cell
                 cell_collapsed = self.observe_cell(i, j)
                 if not cell_collapsed:
                     # Failure
@@ -61,11 +64,32 @@ class WaveFunctionCollapse:
     def observe_cell(self, row_index: int, col_index: int) -> bool:
         possible_states = self.board.compute_possible_states(row_index, col_index)
         for state in possible_states:
+            # Try a state
             self.board.set_cell(row_index, col_index, state)
 
+            # Backtrack
             is_invalid = self.board.cell_is_invalid(row_index, col_index)
-            if not is_invalid:
-                return True
-            self.board.revert()
+            if is_invalid:
+                self.board.revert()
+                continue
+
+            # Propagate
+            # ..Find a cell to collapse
+            failed = False
+            for i in range(Board.width):
+                for j in range(Board.height):
+                    if self.board.is_collapsed(i, j):
+                        continue
+
+                    was_collapsed = self.observe_cell(i, j)
+                    if not was_collapsed:
+                        failed = True
+                        self.board.revert()
+                        break
+
+                if failed:
+                    break
+
+            return not failed
 
         return False
