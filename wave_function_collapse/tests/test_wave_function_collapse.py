@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from sudoku.board import Board
+from sudoku.board import Board, BoardData
 from sudoku.sudoku import sudoku_board, empty_board
 from wave_function_collapse.wave_function_collapse import (
     WaveFunctionCollapse,
@@ -17,7 +17,8 @@ def wave_function_collapse():
 
 @pytest.fixture
 def build_wave_function_collapse():
-    def __inner(board: Board):
+    def __inner(board_data: BoardData):
+        board = Board(np.copy(np.array(board_data)).tolist())
         return WaveFunctionCollapse(board)
 
     return __inner
@@ -36,7 +37,7 @@ def test_constructor():
 
 def test_solve(build_wave_function_collapse):
     # Arrange
-    board: Board = [
+    board: BoardData = [
         [1, 2, 3, 4, 5, 6, 7, 8, 9],
         [9, 1, 2, 3, 4, 5, 6, 7, 8],
         [8, 9, 1, None, None, 4, 5, 6, 7],
@@ -50,21 +51,10 @@ def test_solve(build_wave_function_collapse):
     wave_function_collapse = build_wave_function_collapse(board)
 
     # Act
-    solution = wave_function_collapse.solve()
+    solution = wave_function_collapse.solve().data
 
     # Assert
-    expected_sudoku_board: Board = [
-        [1, 2, 3, 4, 5, 6, 7, 8, 9],
-        [9, 1, 2, 3, 4, 5, 6, 7, 8],
-        [8, 9, 1, 2, 3, 4, 5, 6, 7],
-        [7, 8, 9, 1, 2, 3, 4, 5, 6],
-        [6, 7, 8, 9, 1, 2, 3, 4, 5],
-        [5, 6, 7, 8, 9, 1, 2, 3, 4],
-        [4, 5, 6, 7, 8, 9, 1, 2, 3],
-        [3, 4, 5, 6, 7, 8, 9, 1, 2],
-        [2, 3, 4, 5, 6, 7, 8, 9, 1],
-    ]
-    assert solution == expected_sudoku_board
+    assert solution == sudoku_board
 
 
 @pytest.mark.parametrize(
@@ -89,7 +79,7 @@ def test_observe_col(build_wave_function_collapse):
     # Arrange
     cell_row = 3
     cell_col = 4
-    board: Board = [
+    board: BoardData = [
         [1, 2, 3, 4, 5, 6, 7, 8, 9],
         [9, 1, 2, 3, 4, 5, 6, 7, 8],
         [8, 9, 1, 2, 3, 4, 5, 6, 7],
@@ -106,7 +96,7 @@ def test_observe_col(build_wave_function_collapse):
     collapsed_board: Board = wave_function_collapse.observe_cell(cell_row, cell_col)
 
     # Assert
-    collapsed_cell = collapsed_board[cell_row][cell_col]
+    collapsed_cell = collapsed_board.get_cell(cell_row, cell_col)
     assert collapsed_cell == 2
 
 
@@ -114,7 +104,7 @@ def test_observe_row(build_wave_function_collapse):
     # Arrange
     cell_row = 3
     cell_col = 4
-    board: Board = [
+    board: BoardData = [
         [1, 2, 3, 4, 5, 6, 7, 8, 9],
         [9, 1, 2, 3, 4, 5, 6, 7, 8],
         [8, 9, 1, 2, None, 4, 5, 6, 7],
@@ -131,7 +121,7 @@ def test_observe_row(build_wave_function_collapse):
     collapsed_board: Board = wave_function_collapse.observe_cell(cell_row, cell_col)
 
     # Assert
-    collapsed_cell = collapsed_board[cell_row][cell_col]
+    collapsed_cell = collapsed_board.get_cell(cell_row, cell_col)
     assert collapsed_cell == 2
 
 
@@ -139,7 +129,7 @@ def test_compute_entropy_full_board(build_wave_function_collapse):
     # Arrange
     cell_row = 3
     cell_col = 4
-    board: Board = [
+    board: BoardData = [
         [1, 2, 3, 4, 5, 6, 7, 8, 9],
         [9, 1, 2, 3, 4, 5, 6, 7, 8],
         [8, 9, 1, 2, 3, 4, 5, 6, 7],
@@ -205,51 +195,3 @@ def test_compute_entropy_two_options(build_wave_function_collapse):
 
     # Assert
     assert entropy == 2
-
-
-def test_cell_is_invalid_row(build_wave_function_collapse):
-    # Arrange
-    cell_row = 3
-    cell_col = 4
-    board: Board = [
-        [1, 2, 3, 4, 5, 6, 7, 8, 9],
-        [9, 1, 2, 3, 4, 5, 6, 7, 8],
-        [8, 9, 1, 2, 3, 4, 5, 6, 7],
-        [7, 8, 9, 1, 3, 3, 4, 5, 6],
-        [6, 7, 8, 9, 1, 2, 3, 4, 5],
-        [5, 6, 7, 8, 9, 1, 2, 3, 4],
-        [4, 5, 6, 7, 8, 9, 1, 2, 3],
-        [3, 4, 5, 6, 7, 8, 9, 1, 2],
-        [2, 3, 4, 5, 6, 7, 8, 9, 1],
-    ]
-    wave_function_collapse = build_wave_function_collapse(board)
-
-    # Act
-    result = wave_function_collapse.cell_is_invalid(cell_row, cell_col)
-
-    # Assert
-    assert result is True
-
-
-def test_cell_is_invalid_col(build_wave_function_collapse):
-    # Arrange
-    cell_row = 3
-    cell_col = 4
-    board: Board = [
-        [1, 2, 3, 4, 5, 6, 7, 8, 9],
-        [9, 1, 2, 3, 4, 5, 6, 7, 8],
-        [8, 9, 1, 2, 2, 4, 5, 6, 7],
-        [7, 8, 9, 1, 2, 3, 4, 5, 6],
-        [6, 7, 8, 9, 1, 2, 3, 4, 5],
-        [5, 6, 7, 8, 9, 1, 2, 3, 4],
-        [4, 5, 6, 7, 8, 9, 1, 2, 3],
-        [3, 4, 5, 6, 7, 8, 9, 1, 2],
-        [2, 3, 4, 5, 6, 7, 8, 9, 1],
-    ]
-    wave_function_collapse = build_wave_function_collapse(board)
-
-    # Act
-    result = wave_function_collapse.cell_is_invalid(cell_row, cell_col)
-
-    # Assert
-    assert result is True

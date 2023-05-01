@@ -1,7 +1,7 @@
-from sudoku.board import Board, Line
+from sudoku.board import Board, Line, BoardData
 import numpy as np
 
-sudoku_board: Board = [
+sudoku_board: BoardData = [
     [1, 2, 3, 4, 5, 6, 7, 8, 9],
     [9, 1, 2, 3, 4, 5, 6, 7, 8],
     [8, 9, 1, 2, 3, 4, 5, 6, 7],
@@ -13,43 +13,13 @@ sudoku_board: Board = [
     [2, 3, 4, 5, 6, 7, 8, 9, 1],
 ]
 
-empty_board: Board = np.full([9, 9], None).tolist()
-
-
-def print_board():
-    for row in sudoku_board:
-        print(row)
-
-
-def is_row_valid(row: Line):
-    if {1, 2, 3, 4, 5, 6, 7, 8, 9} == set(row):
-        return True
-
-    return False
-
-
-def is_col_valid(index: int):
-    col: Line = [row[index] for row in sudoku_board]
-    if {1, 2, 3, 4, 5, 6, 7, 8, 9} == set(col):
-        return True
-    return False
-
-
-def is_board_valid():
-    for row in sudoku_board:
-        if not is_row_valid(row):
-            return False
-
-    for col_index in range(len(sudoku_board[0])):
-        if not is_col_valid(col_index):
-            return False
-
-    return True
+empty_board: BoardData = np.full([9, 9], None).tolist()
 
 
 def main():
-    print_board()
-    print(is_board_valid())
+    board = Board(sudoku_board)
+    board.print_board()
+    print(board.is_valid())
 
 
 if __name__ == "__main__":
