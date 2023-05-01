@@ -23,19 +23,6 @@ def test_constructor():
     assert isinstance(obj, Board)
 
 
-def test_get_cell(build_board):
-    # Arrange
-    board_data = np.copy(np.array(empty_board)).tolist()
-    board_data[2][2] = 9
-    board = build_board(board_data)
-
-    # Act
-    result = board.get_cell(2, 2)
-
-    # Assert
-    assert result == 9
-
-
 def test_cell_is_invalid_row(build_board):
     # Arrange
     cell_row = 3

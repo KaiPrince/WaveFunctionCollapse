@@ -14,7 +14,7 @@ class Board:
         self.prev_data = list()
         self.data = data
 
-    def get_cell(self, row_index: int, col_index: int):
+    def _get_cell(self, row_index: int, col_index: int):
         return self.data[row_index][col_index]
 
     def set_cell(self, row_index: int, col_index: int, value: int):
@@ -53,7 +53,7 @@ class Board:
         return True
 
     def is_collapsed(self, row_index: int, col_index: int):
-        cell = self.get_cell(row_index, col_index)
+        cell = self._get_cell(row_index, col_index)
         return cell is not None
 
     def compute_possible_states(self, row_index: int, col_index: int):
