@@ -1,6 +1,6 @@
 import numpy as np
 
-from sudoku.board import Board, Cell
+from sudoku.board import Board
 
 MIN_ENTROPY = 0
 MAX_ENTROPY = 9
@@ -26,8 +26,7 @@ class WaveFunctionCollapse:
         # Propagation: propagate information gained on the previous observation step.
         for i in range(Board.width):
             for j in range(Board.height):
-                cell = self.board.get_cell(i, j)
-                if self.is_collapsed(cell):
+                if self.board.is_collapsed(i, j):
                     continue
 
                 self.observe_cell(i, j)
@@ -56,15 +55,10 @@ class WaveFunctionCollapse:
         return wave
 
     def get_entropy(self, row_index, col_index):
-        cell: Cell = self.board.get_cell(row_index, col_index)
-
-        if self.is_collapsed(cell):
+        if self.board.is_collapsed(row_index, col_index):
             return MIN_ENTROPY
         else:
             return len(self.board.compute_possible_states(row_index, col_index))
-
-    def is_collapsed(self, cell: Cell):
-        return cell is not None
 
     def observe_cell(self, row_index: int, col_index: int):
         possible_states = self.board.compute_possible_states(row_index, col_index)

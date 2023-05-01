@@ -52,6 +52,10 @@ class Board:
 
         return True
 
+    def is_collapsed(self, row_index: int, col_index: int):
+        cell = self.get_cell(row_index, col_index)
+        return cell is not None
+
     def compute_possible_states(self, row_index: int, col_index: int):
         possible_states = {1, 2, 3, 4, 5, 6, 7, 8, 9}
         for cell in self.data[row_index]:
