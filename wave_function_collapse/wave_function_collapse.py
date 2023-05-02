@@ -51,8 +51,6 @@ class WaveFunctionCollapse:
                 continue
 
             # Propagate
-            failed = False
-            # ..across row
             coefficient_cells: list[Cell] = self.collapser.get_coefficient_cells(cell)
             for cell in coefficient_cells:
                 was_collapsed = self.observe_cell(cell)
