@@ -70,20 +70,27 @@ class WaveFunctionCollapse:
                 continue
 
             # Propagate
-            # ..Find a cell to collapse
             failed = False
+            # ..across row
             for i in range(Board.width):
-                for j in range(Board.height):
-                    if self.board.is_collapsed(i, j):
+                if self.board.is_collapsed(row_index, i):
+                    continue
+
+                was_collapsed = self.observe_cell(row_index, i)
+                if not was_collapsed:
+                    failed = True
+                    self.board.revert()
+                    break
+
+            if not failed:
+                # ..across col
+                for i in range(Board.height):
+                    if self.board.is_collapsed(i, col_index):
                         continue
 
-                    was_collapsed = self.observe_cell(i, j)
+                    was_collapsed = self.observe_cell(i, col_index)
                     if not was_collapsed:
-                        failed = True
                         self.board.revert()
                         break
-
-                if failed:
-                    break
 
         return self.board.is_collapsed(row_index, col_index)

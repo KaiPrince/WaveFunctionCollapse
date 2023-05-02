@@ -38,17 +38,17 @@ def test_solve(build_wave_function_collapse):
         [7, 8, 9, None, None, 3, 4, 5, 6],
         [6, 7, 8, 9, 1, 2, 3, 4, 5],
         [5, 6, 7, 8, 9, 1, 2, 3, 4],
-        [4, 5, 6, 7, 8, 9, 1, 2, 3],
+        [4, None, 6, 7, 8, 9, 1, 2, 3],
         [3, 4, 5, 6, 7, 8, 9, 1, 2],
         [2, 3, 4, 5, 6, 7, 8, 9, 1],
     ]
     wave_function_collapse = build_wave_function_collapse(board)
 
     # Act
-    solution = wave_function_collapse.solve().data
+    solution = wave_function_collapse.solve()
 
     # Assert
-    assert solution == sudoku_board
+    assert solution.data == sudoku_board
 
 
 @pytest.mark.skip("todo")
