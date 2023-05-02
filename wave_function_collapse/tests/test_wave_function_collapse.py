@@ -10,12 +10,6 @@ from wave_function_collapse.wave_function_collapse import (
 
 
 @pytest.fixture
-def wave_function_collapse():
-    board = sudoku_board
-    return WaveFunctionCollapse(board)
-
-
-@pytest.fixture
 def build_wave_function_collapse():
     def __inner(board_data: BoardData):
         board = Board(np.copy(np.array(board_data)).tolist())
