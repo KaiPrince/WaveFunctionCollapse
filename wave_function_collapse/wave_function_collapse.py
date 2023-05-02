@@ -33,18 +33,14 @@ class WaveFunctionCollapse:
 
                 # .. collapse the cell
                 cell_collapsed = self.observe_cell(i, j)
+
+                # By now all the wave elements are either in a completely observed state (all the coefficients except
+                # one being zero) or in the contradictory state (all the coefficients being zero). In the first case
+                # return the output. In the second case finish the work without returning anything.
+                # compute_board_entropy = np.vectorize(self.get_entropy) board_entropy = compute_board_entropy(
+                # self.board)
                 if not cell_collapsed:
-                    # Failure
                     raise NotImplementedError
-
-                # TODO propagate
-                # TODO backtrack
-
-        # By now all the wave elements are either in a completely observed state (all the coefficients except one being
-        # zero) or in the contradictory state (all the coefficients being zero). In the first case return the output.
-        # In the second case finish the work without returning anything.
-        # compute_board_entropy = np.vectorize(self.get_entropy)
-        # board_entropy = compute_board_entropy(self.board)
 
         return self.board
 
