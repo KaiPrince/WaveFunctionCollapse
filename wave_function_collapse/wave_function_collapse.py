@@ -22,7 +22,7 @@ class WaveFunctionCollapse:
         # Propagation: propagate information gained on the previous observation step.
 
         for cell in collapse_queue:
-            cell_collapsed = self.observe_cell(cell)
+            cell_collapsed = self.try_observe_cell(cell)
 
             # By now all the wave elements are either in a completely observed state (all the coefficients except
             # one being zero) or in the contradictory state (all the coefficients being zero). In the first case
@@ -34,7 +34,7 @@ class WaveFunctionCollapse:
 
         return True
 
-    def observe_cell(self, cell: Cell) -> bool:
+    def try_observe_cell(self, cell: Cell) -> bool:
         possible_states = self.collapser.compute_possible_states(cell)
         for state in possible_states:
             # Try a state
@@ -49,7 +49,7 @@ class WaveFunctionCollapse:
     def try_propagate(self, cell: Cell) -> bool:
         coefficient_cells: list[Cell] = self.collapser.get_coefficient_cells(cell)
         for cell in coefficient_cells:
-            was_collapsed = self.observe_cell(cell)
+            was_collapsed = self.try_observe_cell(cell)
             if not was_collapsed:
                 return False
 

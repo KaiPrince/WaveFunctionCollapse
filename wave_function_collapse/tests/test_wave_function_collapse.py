@@ -85,7 +85,7 @@ def test_observe_col(build_wave_function_collapse):
     wave_function_collapse = build_wave_function_collapse(board)
 
     # Act
-    was_collapsed = wave_function_collapse.observe_cell(Cell(cell_row, cell_col))
+    was_collapsed = wave_function_collapse.try_observe_cell(Cell(cell_row, cell_col))
 
     # Assert
     assert was_collapsed is True
@@ -111,7 +111,7 @@ def test_observe_row(build_wave_function_collapse):
     wave_function_collapse = build_wave_function_collapse(board)
 
     # Act
-    was_collapsed = wave_function_collapse.observe_cell(Cell(cell_row, cell_col))
+    was_collapsed = wave_function_collapse.try_observe_cell(Cell(cell_row, cell_col))
 
     # Assert
     assert was_collapsed is True
