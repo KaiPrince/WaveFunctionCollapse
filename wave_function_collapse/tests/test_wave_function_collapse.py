@@ -79,6 +79,7 @@ def test_solve_empty_board(build_wave_function_collapse):
     solution = wave_function_collapse.solve()
 
     # Assert
+    assert solution.is_valid()
 
 
 @pytest.mark.parametrize(

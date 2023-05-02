@@ -90,6 +90,4 @@ class WaveFunctionCollapse:
                 if failed:
                     break
 
-            return not failed
-
-        return False
+        return self.board.is_collapsed(row_index, col_index)
