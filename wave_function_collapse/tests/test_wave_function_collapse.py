@@ -3,7 +3,7 @@ import numpy as np
 
 from sudoku.board import Board, BoardData
 from sudoku.sudoku import sudoku_board, empty_board
-from wave_function_collapse.board_collapser import BoardCollapser
+from sudoku.board_collapser import BoardCollapser
 from wave_function_collapse.cell import Cell
 from wave_function_collapse.wave_function_collapse import WaveFunctionCollapse
 

@@ -1,11 +1,11 @@
-from wave_function_collapse.board_collapser import BoardCollapser
 from wave_function_collapse.cell import Cell
+from wave_function_collapse.collapser import Collapser
 
 
 class WaveFunctionCollapse:
-    collapser: BoardCollapser
+    collapser: Collapser
 
-    def __init__(self, collapser: BoardCollapser):
+    def __init__(self, collapser: Collapser):
         self.collapser = collapser
 
     def try_solve(self) -> bool:

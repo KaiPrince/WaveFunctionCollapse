@@ -3,7 +3,7 @@ import pytest
 
 from sudoku.board import BoardData, Board
 from sudoku.sudoku import sudoku_board, empty_board
-from wave_function_collapse.board_collapser import MIN_ENTROPY, BoardCollapser
+from sudoku.board_collapser import MIN_ENTROPY, BoardCollapser
 from wave_function_collapse.cell import Cell
 
 

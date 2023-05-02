@@ -2,11 +2,12 @@ import numpy as np
 
 from sudoku.board import Board, CellState
 from wave_function_collapse.cell import Cell
+from wave_function_collapse.collapser import Collapser
 
 MIN_ENTROPY = 0
 
 
-class BoardCollapser:
+class BoardCollapser(Collapser):
     board: Board
 
     def __init__(self, board: Board):
