@@ -1,8 +1,6 @@
 from wave_function_collapse.board_collapser import BoardCollapser
 from wave_function_collapse.cell import Cell
 
-MIN_ENTROPY = 0
-
 
 class WaveFunctionCollapse:
     collapser: BoardCollapser
