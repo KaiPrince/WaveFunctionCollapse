@@ -10,7 +10,7 @@ class WaveFunctionCollapse:
     def __init__(self, collapser: BoardCollapser):
         self.collapser = collapser
 
-    def solve(self) -> bool:
+    def try_solve(self) -> bool:
         # Initialize the wave in the completely unobserved state, i.e. with all the boolean coefficients being true.
         collapse_queue = self.collapser.compute_wave_collapse_queue()
 
@@ -23,9 +23,7 @@ class WaveFunctionCollapse:
         #   patterns in the input.
         # Propagation: propagate information gained on the previous observation step.
 
-        # ..Find a cell to collapse
         for cell in collapse_queue:
-            # .. collapse the cell
             cell_collapsed = self.observe_cell(cell)
 
             # By now all the wave elements are either in a completely observed state (all the coefficients except
@@ -34,7 +32,7 @@ class WaveFunctionCollapse:
             # compute_board_entropy = np.vectorize(self.get_entropy) board_entropy = compute_board_entropy(
             # self.board)
             if not cell_collapsed:
-                raise NotImplementedError
+                return False
 
         return True
 
@@ -45,17 +43,16 @@ class WaveFunctionCollapse:
             self.collapser.set_cell_state(cell, state)
 
             # Backtrack
-            is_invalid = self.collapser.cell_is_invalid(cell)
-            if is_invalid:
+            if self.collapser.cell_is_invalid(cell) or not self.try_propagate(cell):
                 self.collapser.revert()
-                continue
-
-            # Propagate
-            coefficient_cells: list[Cell] = self.collapser.get_coefficient_cells(cell)
-            for cell in coefficient_cells:
-                was_collapsed = self.observe_cell(cell)
-                if not was_collapsed:
-                    self.collapser.revert()
-                    break
 
         return self.collapser.is_collapsed(cell)
+
+    def try_propagate(self, cell: Cell) -> bool:
+        coefficient_cells: list[Cell] = self.collapser.get_coefficient_cells(cell)
+        for cell in coefficient_cells:
+            was_collapsed = self.observe_cell(cell)
+            if not was_collapsed:
+                return False
+
+        return True

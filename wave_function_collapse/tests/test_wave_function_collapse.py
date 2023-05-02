@@ -34,7 +34,7 @@ def test_solve(build_wave_function_collapse):
     wave_function_collapse = build_wave_function_collapse(board)
 
     # Act
-    found_solution = wave_function_collapse.solve()
+    found_solution = wave_function_collapse.try_solve()
 
     # Assert
     assert found_solution is True
@@ -50,7 +50,7 @@ def test_solve_fails(build_wave_function_collapse):
 
     # Act
     with pytest.raises(NotImplementedError):
-        wave_function_collapse.solve()
+        wave_function_collapse.try_solve()
 
     # Assert
 
@@ -60,7 +60,7 @@ def test_solve_empty_board(build_wave_function_collapse):
     wave_function_collapse = build_wave_function_collapse(empty_board)
 
     # Act
-    found_solution = wave_function_collapse.solve()
+    found_solution = wave_function_collapse.try_solve()
 
     # Assert
     assert found_solution is True
