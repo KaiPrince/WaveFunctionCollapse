@@ -26,21 +26,24 @@ class WaveFunctionCollapse:
         # Propagation: propagate information gained on the previous observation step.
 
         # ..Find a cell to collapse
-        for i in range(Board.width):
-            for j in range(Board.height):
-                if self.board.is_collapsed(i, j):
-                    continue
+        collapse_queue = [
+            (i, j)
+            for i in range(len(wave))
+            for j in range(len(wave[0]))
+            if wave[i][j] != MIN_ENTROPY
+        ]
+        collapse_queue.sort(key=lambda coords: wave[coords[0]][coords[1]])
+        for i, j in collapse_queue:
+            # .. collapse the cell
+            cell_collapsed = self.observe_cell(i, j)
 
-                # .. collapse the cell
-                cell_collapsed = self.observe_cell(i, j)
-
-                # By now all the wave elements are either in a completely observed state (all the coefficients except
-                # one being zero) or in the contradictory state (all the coefficients being zero). In the first case
-                # return the output. In the second case finish the work without returning anything.
-                # compute_board_entropy = np.vectorize(self.get_entropy) board_entropy = compute_board_entropy(
-                # self.board)
-                if not cell_collapsed:
-                    raise NotImplementedError
+            # By now all the wave elements are either in a completely observed state (all the coefficients except
+            # one being zero) or in the contradictory state (all the coefficients being zero). In the first case
+            # return the output. In the second case finish the work without returning anything.
+            # compute_board_entropy = np.vectorize(self.get_entropy) board_entropy = compute_board_entropy(
+            # self.board)
+            if not cell_collapsed:
+                raise NotImplementedError
 
         return self.board
 

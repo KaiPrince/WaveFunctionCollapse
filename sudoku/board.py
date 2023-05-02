@@ -12,12 +12,14 @@ class Board:
 
     def __init__(self, data: BoardData):
         self.prev_data = list()
+        self.tries = 0
         self.data = data
 
     def _get_cell(self, row_index: int, col_index: int):
         return self.data[row_index][col_index]
 
     def set_cell(self, row_index: int, col_index: int, value: int):
+        self.tries += 1
         self.prev_data.append(np.copy(np.array(self.data)).tolist())
 
         self.data[row_index][col_index] = value
