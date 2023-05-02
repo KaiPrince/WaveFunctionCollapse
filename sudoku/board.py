@@ -1,7 +1,7 @@
 import numpy as np
 
-Cell = int | None
-Line = list[Cell]
+CellState = int | None
+Line = list[CellState]
 BoardData = list[Line]
 
 
@@ -15,7 +15,7 @@ class Board:
         self.tries = 0
         self.data = data
 
-    def _get_cell(self, row_index: int, col_index: int):
+    def get_cell(self, row_index: int, col_index: int):
         return self.data[row_index][col_index]
 
     def set_cell(self, row_index: int, col_index: int, value: int):
@@ -53,23 +53,6 @@ class Board:
                 return False
 
         return True
-
-    def is_collapsed(self, row_index: int, col_index: int):
-        cell = self._get_cell(row_index, col_index)
-        return cell is not None
-
-    def compute_possible_states(self, row_index: int, col_index: int):
-        possible_states = {1, 2, 3, 4, 5, 6, 7, 8, 9}
-        for cell in self.data[row_index]:
-            if cell in possible_states:
-                possible_states.remove(cell)
-
-        for row in self.data:
-            cell = row[col_index]
-            if cell in possible_states:
-                possible_states.remove(cell)
-
-        return possible_states
 
     def cell_is_invalid(self, row_index: int, col_index: int) -> bool:
         cell = self.data[row_index][col_index]
