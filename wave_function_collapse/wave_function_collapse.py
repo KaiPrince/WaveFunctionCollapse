@@ -25,7 +25,6 @@ class WaveFunctionCollapse:
         #   patterns in the input.
         # Propagation: propagate information gained on the previous observation step.
 
-        # ..Find a cell to collapse
         collapse_queue = [
             (i, j)
             for i in range(len(wave))
@@ -33,6 +32,8 @@ class WaveFunctionCollapse:
             if wave[i][j] != MIN_ENTROPY
         ]
         collapse_queue.sort(key=lambda coords: wave[coords[0]][coords[1]])
+
+        # ..Find a cell to collapse
         for i, j in collapse_queue:
             # .. collapse the cell
             cell_collapsed = self.observe_cell(i, j)
