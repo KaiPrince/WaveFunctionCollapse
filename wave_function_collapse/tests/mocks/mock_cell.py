@@ -18,6 +18,9 @@ class MockCell(Cell[int]):
     def is_invalid(self) -> bool:
         return not any(self.super_position)
 
+    def is_collapsed(self) -> bool:
+        return len(self.super_position) == 1
+
     def eliminate_coefficients(self, other: 'MockCell'):
         super_position = self.super_position.difference(other.super_position)
         self._set_super_position(super_position)

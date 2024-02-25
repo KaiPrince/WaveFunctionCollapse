@@ -1,119 +1,29 @@
-import pytest
-import numpy as np
-
-from sudoku.board import Board, BoardData
-from sudoku.sudoku import sudoku_board, empty_board
-from sudoku.board_collapser import BoardCollapser
-from wave_function_collapse.cell import Cell
+from wave_function_collapse.tests.mocks.mock_cell import MockCell
+from wave_function_collapse.tests.mocks.mock_collapser import MockCollapser
 from wave_function_collapse.wave_function_collapse import WaveFunctionCollapse
 
 
-@pytest.fixture
-def build_wave_function_collapse():
-    def __inner(board_data: BoardData):
-        board = Board(np.copy(np.array(board_data)).tolist())
-        board_collapser = BoardCollapser(board)
-        return WaveFunctionCollapse(board_collapser)
-
-    return __inner
-
-
-def test_solve(build_wave_function_collapse):
+def test_one_uncollapsed():
     # Arrange
-    board: BoardData = [
-        [1, 2, 3, 4, 5, 6, 7, 8, 9],
-        [9, 1, 2, 3, 4, 5, 6, 7, 8],
-        [8, 9, 1, None, None, 4, 5, 6, 7],
-        [7, 8, 9, None, None, 3, 4, 5, 6],
-        [6, 7, 8, 9, 1, 2, 3, 4, 5],
-        [5, 6, 7, 8, 9, 1, 2, 3, 4],
-        [4, None, 6, 7, 8, 9, 1, 2, 3],
-        [3, 4, 5, 6, 7, 8, 9, 1, 2],
-        [2, 3, 4, 5, 6, 7, 8, 9, 1],
-    ]
-    wave_function_collapse = build_wave_function_collapse(board)
+    wave_function = [MockCell({1}), MockCell({2}), MockCell({1, 2, 3})]
+    collapser = MockCollapser(wave_function)
+    director = WaveFunctionCollapse(collapser)
 
     # Act
-    found_solution = wave_function_collapse.try_solve()
+    result = director.try_solve()
 
     # Assert
-    assert found_solution is True
-    assert wave_function_collapse.collapser.board.data == sudoku_board
+    assert result is True
 
 
-@pytest.mark.skip("todo")
-def test_solve_fails(build_wave_function_collapse):
+def test_all_uncollapsed():
     # Arrange
-    board: BoardData = np.full([9, 9], 1).tolist()
-    board[3][3] = None
-    wave_function_collapse = build_wave_function_collapse(board)
+    wave_function = [MockCell({1, 2, 3}), MockCell({1, 2, 3}), MockCell({1, 2, 3})]
+    collapser = MockCollapser(wave_function)
+    director = WaveFunctionCollapse(collapser)
 
     # Act
-    with pytest.raises(NotImplementedError):
-        wave_function_collapse.try_solve()
+    result = director.try_solve()
 
     # Assert
-
-
-def test_solve_empty_board(build_wave_function_collapse):
-    # Arrange
-    wave_function_collapse = build_wave_function_collapse(empty_board)
-
-    # Act
-    found_solution = wave_function_collapse.try_solve()
-
-    # Assert
-    assert found_solution is True
-    assert wave_function_collapse.collapser.board.is_valid()
-
-
-def test_observe_col(build_wave_function_collapse):
-    # Arrange
-    cell_row = 3
-    cell_col = 4
-    board: BoardData = [
-        [1, 2, 3, 4, 5, 6, 7, 8, 9],
-        [9, 1, 2, 3, 4, 5, 6, 7, 8],
-        [8, 9, 1, 2, 3, 4, 5, 6, 7],
-        [7, 8, 9, None, None, 3, 4, 5, 6],
-        [6, 7, 8, 9, 1, 2, 3, 4, 5],
-        [5, 6, 7, 8, 9, 1, 2, 3, 4],
-        [4, 5, 6, 7, 8, 9, 1, 2, 3],
-        [3, 4, 5, 6, 7, 8, 9, 1, 2],
-        [2, 3, 4, 5, 6, 7, 8, 9, 1],
-    ]
-    wave_function_collapse = build_wave_function_collapse(board)
-
-    # Act
-    was_collapsed = wave_function_collapse.try_observe_cell(Cell(cell_row, cell_col))
-
-    # Assert
-    assert was_collapsed is True
-    collapsed_cell = wave_function_collapse.collapser.board.get_cell(cell_row, cell_col)
-    assert collapsed_cell == 2
-
-
-def test_observe_row(build_wave_function_collapse):
-    # Arrange
-    cell_row = 3
-    cell_col = 4
-    board: BoardData = [
-        [1, 2, 3, 4, 5, 6, 7, 8, 9],
-        [9, 1, 2, 3, 4, 5, 6, 7, 8],
-        [8, 9, 1, 2, None, 4, 5, 6, 7],
-        [7, 8, 9, 1, None, 3, 4, 5, 6],
-        [6, 7, 8, 9, 1, 2, 3, 4, 5],
-        [5, 6, 7, 8, 9, 1, 2, 3, 4],
-        [4, 5, 6, 7, 8, 9, 1, 2, 3],
-        [3, 4, 5, 6, 7, 8, 9, 1, 2],
-        [2, 3, 4, 5, 6, 7, 8, 9, 1],
-    ]
-    wave_function_collapse = build_wave_function_collapse(board)
-
-    # Act
-    was_collapsed = wave_function_collapse.try_observe_cell(Cell(cell_row, cell_col))
-
-    # Assert
-    assert was_collapsed is True
-    collapsed_cell = wave_function_collapse.collapser.board.get_cell(cell_row, cell_col)
-    assert collapsed_cell == 2
+    assert result is True

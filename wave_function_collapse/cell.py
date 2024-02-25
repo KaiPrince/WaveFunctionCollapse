@@ -20,6 +20,10 @@ class Cell[T_Coefficient](ABC):
         pass
 
     @abstractmethod
+    def is_collapsed(self) -> bool:
+        pass
+
+    @abstractmethod
     def eliminate_coefficients(self, other: 'Cell[T_Coefficient]'):
         pass
 
