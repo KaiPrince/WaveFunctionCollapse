@@ -16,7 +16,7 @@ class WaveFunctionCollapse:
     def try_solve(self) -> bool:
         # Initialize the wave in the completely unobserved state,
         # i.e. with all the states being possible for each element.
-        collapse_queue = self.collapser.get_wave_function()
+        wave_function = self.collapser.get_wave_function()
 
         # Repeat the following steps:
         # Observation:
@@ -26,15 +26,39 @@ class WaveFunctionCollapse:
         #   Collapse this element into a definite state according to its coefficients and the distribution of NxN
         #   patterns in the input.
         # Propagation: propagate information gained on the previous observation step.
-        while any([not cell.is_collapsed() and not cell.is_invalid() for cell in collapse_queue]):
-            # Randomly choose among the cells with the minimum entropy
-            cell_entropies = {cell.entropy() for cell in collapse_queue if not cell.is_collapsed()}
-            min_entropy = min(cell_entropies)
-            min_entropy_cells = [x for x in collapse_queue if x.entropy() == min_entropy]
+        cell_entropies = list({cell.entropy() for cell in wave_function if not cell.is_collapsed()})
+        cell_entropies.sort()
 
-            for cell in self.random_provider.shuffle(list(min_entropy_cells)):
-                if self.try_observe_cell(cell):
-                    break
+        for entropy in cell_entropies:
+
+            cells = [x for x in wave_function if x.entropy() == entropy]
+            randomly_ordered_cells = self.random_provider.shuffle(cells)
+
+            for cell in randomly_ordered_cells:
+                cell_observed = self.try_observe_cell(cell)
+                # Top level
+                if cell_observed:
+                    if all([x.is_collapsed() for x in wave_function]):
+                        return True
+
+                    inner_cell_entropies = list({x.entropy() for x in wave_function if not x.is_collapsed()})
+                    inner_cell_entropies.sort()
+
+                    for inner_entropy in inner_cell_entropies:
+                        # Inner search
+                        inner_cells = [x for x in wave_function if x.entropy() == inner_entropy]
+                        inner_randomly_ordered_cells = self.random_provider.shuffle(inner_cells)
+
+                        inner_rollback_cells: list[Cell] = []
+                        for inner_cell in inner_randomly_ordered_cells:
+                            if self.try_observe_cell(inner_cell):
+                                if all([x.is_collapsed() for x in wave_function]):
+                                    return True
+                                inner_rollback_cells.append(inner_cell)
+                            else:
+                                for inner_rollback_cell in inner_rollback_cells:
+                                    inner_rollback_cell.revert()
+                                break
 
         # By now all the wave elements are either in a completely observed state (all the coefficients except
         # one being zero) or in the contradictory state (all the coefficients being zero). In the first case
@@ -42,7 +66,7 @@ class WaveFunctionCollapse:
         # compute_board_entropy = np.vectorize(self.get_entropy) board_entropy = compute_board_entropy(
         # self.board)
 
-        return True
+        return False
 
     def try_observe_cell(self, cell: Cell) -> bool:
         if cell.is_collapsed():
@@ -69,19 +93,25 @@ class WaveFunctionCollapse:
         influenced_cells = self.collapser.get_influenced_cells(cell)
         influenced_cells_except_already_visited = [x for x in influenced_cells if all([x is not y for y in visited])]
         rollback_cells = []
+
+        # Breadth-first propagation
         for influenced_cell in influenced_cells_except_already_visited:
             influenced_cell.eliminate_coefficients(cell)
 
-            if (
-                    influenced_cell.is_invalid()
-                    or not self.try_propagate(influenced_cell, [*visited, cell])
-            ):
+            if influenced_cell.is_invalid():
                 influenced_cell.revert()
                 for rollback_cell in rollback_cells:
                     rollback_cell.revert()
                 return False
 
             rollback_cells.append(influenced_cell)
+
+        for influenced_cell in influenced_cells_except_already_visited:
+            if not self.try_propagate(influenced_cell, [*visited, cell]):
+                influenced_cell.revert()
+                for rollback_cell in rollback_cells:
+                    rollback_cell.revert()
+                return False
 
         return True
 

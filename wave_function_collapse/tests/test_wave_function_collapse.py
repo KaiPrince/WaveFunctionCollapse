@@ -37,6 +37,22 @@ def test_solve_all_uncollapsed():
     assert wave_function[2].super_position == {3}
 
 
+def test_solve_invalid():
+    # Arrange
+    wave_function = [MockCell({1, 2}), MockCell({1, 2}), MockCell({1, 2})]
+    collapser = MockCollapser(wave_function)
+    director = WaveFunctionCollapse(collapser)
+
+    # Act
+    result = director.try_solve()
+
+    # Assert
+    assert result is False
+    assert wave_function[0].super_position == {1, 2}
+    assert wave_function[1].super_position == {1, 2}
+    assert wave_function[2].super_position == {1, 2}
+
+
 def test_observe_one_uncollapsed():
     # Arrange
     wave_function = [MockCell({1, 2, 3}), MockCell({1, 2, 3}), MockCell({1, 2, 3})]
