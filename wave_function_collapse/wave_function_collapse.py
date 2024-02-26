@@ -35,36 +35,16 @@ class WaveFunctionCollapse:
             randomly_ordered_cells = self.random_provider.shuffle(cells)
 
             for cell in randomly_ordered_cells:
-                cell_observed = self.try_observe_cell(cell)
-                # Top level
-                if cell_observed:
+                if self.try_observe_cell(cell):
                     if all([x.is_collapsed() for x in wave_function]):
                         return True
 
-                    inner_cell_entropies = list({x.entropy() for x in wave_function if not x.is_collapsed()})
-                    inner_cell_entropies.sort()
-
-                    for inner_entropy in inner_cell_entropies:
-                        # Inner search
-                        inner_cells = [x for x in wave_function if x.entropy() == inner_entropy]
-                        inner_randomly_ordered_cells = self.random_provider.shuffle(inner_cells)
-
-                        inner_rollback_cells: list[Cell] = []
-                        for inner_cell in inner_randomly_ordered_cells:
-                            if self.try_observe_cell(inner_cell):
-                                if all([x.is_collapsed() for x in wave_function]):
-                                    return True
-                                inner_rollback_cells.append(inner_cell)
-                            else:
-                                for inner_rollback_cell in inner_rollback_cells:
-                                    inner_rollback_cell.revert()
-                                break
-
-        # By now all the wave elements are either in a completely observed state (all the coefficients except
-        # one being zero) or in the contradictory state (all the coefficients being zero). In the first case
-        # return the output. In the second case finish the work without returning anything.
-        # compute_board_entropy = np.vectorize(self.get_entropy) board_entropy = compute_board_entropy(
-        # self.board)
+                    if self.try_solve():
+                        # By now all the wave elements are either in a completely observed state (all the coefficients
+                        # except one being zero) or in the contradictory state (all the coefficients being zero). In
+                        # the first case return the output. In the second case finish the work without returning
+                        # anything.
+                        return True
 
         return False
 
