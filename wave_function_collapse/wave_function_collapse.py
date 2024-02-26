@@ -1,14 +1,17 @@
-import random
-
 from wave_function_collapse.cell import Cell
 from wave_function_collapse.collapser import Collapser
+from wave_function_collapse.random_provider import RandomProvider
 
 
 class WaveFunctionCollapse:
     collapser: Collapser
 
-    def __init__(self, collapser: Collapser):
+    def __init__(self, collapser: Collapser, random_provider: RandomProvider[Cell] = None):
+        if random_provider is None:
+            random_provider = RandomProvider()
+
         self.collapser = collapser
+        self.random_provider = random_provider
 
     def try_solve(self) -> bool:
         # Initialize the wave in the completely unobserved state,
@@ -29,7 +32,7 @@ class WaveFunctionCollapse:
             min_entropy = min(cell_entropies)
             min_entropy_cells = [x for x in collapse_queue if len(x.compute_possible_states()) == min_entropy]
 
-            for cell in random.sample(list(min_entropy_cells), k=len(min_entropy_cells)):
+            for cell in self.random_provider.shuffle(list(min_entropy_cells)):
                 if self.try_observe_cell(cell):
                     break
 
@@ -48,7 +51,7 @@ class WaveFunctionCollapse:
 
         # Collapse randomly
         possible_states = cell.compute_possible_states()
-        for state in random.sample(list(possible_states), k=len(possible_states)):
+        for state in self.random_provider.shuffle(list(possible_states)):
             cell.collapse(state)
 
             if self.try_propagate(cell):
@@ -59,21 +62,26 @@ class WaveFunctionCollapse:
 
         return False
 
-    def try_propagate(self, cell: Cell, visited: set[Cell] = None) -> bool:
+    def try_propagate(self, cell: Cell, visited: list[Cell] = None) -> bool:
         if visited is None:
-            visited = set()
+            visited = []
 
         influenced_cells = self.collapser.get_influenced_cells(cell)
-        influenced_cells_except_already_visited = set(influenced_cells).difference(visited)
+        influenced_cells_except_already_visited = [x for x in influenced_cells if all([x is not y for y in visited])]
+        rollback_cells = []
         for influenced_cell in influenced_cells_except_already_visited:
             influenced_cell.eliminate_coefficients(cell)
 
             if (
                     influenced_cell.is_invalid()
-                    or not self.try_propagate(influenced_cell, visited.union({influenced_cell}))
+                    or not self.try_propagate(influenced_cell, [*visited, cell])
             ):
                 influenced_cell.revert()
+                for rollback_cell in rollback_cells:
+                    rollback_cell.revert()
                 return False
+
+            rollback_cells.append(influenced_cell)
 
         return True
 
@@ -85,10 +93,10 @@ class WaveFunctionCollapse:
         cell_entropies = {len(cell.compute_possible_states()) for cell in cells}
         min_entropy = min(cell_entropies.difference({1}))  # Ignore collapsed cells
         min_entropy_cells = [x for x in cells if len(x.compute_possible_states()) == min_entropy]
-        cell = random.choice(min_entropy_cells)
+        cell = self.random_provider.choice(min_entropy_cells)
 
         states = cell.compute_possible_states()
-        for collapse_state in random.sample(list(states), k=len(states)):
+        for collapse_state in self.random_provider.shuffle(list(states)):
             cell.collapse(collapse_state)
 
             rollback_cells = []

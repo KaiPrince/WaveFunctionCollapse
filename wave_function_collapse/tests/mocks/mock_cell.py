@@ -22,8 +22,10 @@ class MockCell(Cell[int]):
         return len(self.super_position) == 1
 
     def eliminate_coefficients(self, other: 'MockCell'):
-        super_position = self.super_position.difference(other.super_position)
-        self._set_super_position(super_position)
+        if other.is_collapsed():
+            super_position = self.super_position.difference(other.super_position)
+            self._set_super_position(super_position)
+        # Add adjacency-specific rules here
 
     def revert(self):
         if any(self.history):
@@ -32,3 +34,6 @@ class MockCell(Cell[int]):
     def _set_super_position(self, super_position: T_SuperPosition):
         self.history.append(self.super_position)
         self.super_position = super_position
+
+    def __repr__(self):
+        return f'MockCell({self.super_position})'
