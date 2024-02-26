@@ -28,9 +28,9 @@ class WaveFunctionCollapse:
         # Propagation: propagate information gained on the previous observation step.
         while any([not cell.is_collapsed() and not cell.is_invalid() for cell in collapse_queue]):
             # Randomly choose among the cells with the minimum entropy
-            cell_entropies = {len(cell.compute_possible_states()) for cell in collapse_queue if not cell.is_collapsed()}
+            cell_entropies = {cell.entropy() for cell in collapse_queue if not cell.is_collapsed()}
             min_entropy = min(cell_entropies)
-            min_entropy_cells = [x for x in collapse_queue if len(x.compute_possible_states()) == min_entropy]
+            min_entropy_cells = [x for x in collapse_queue if x.entropy() == min_entropy]
 
             for cell in self.random_provider.shuffle(list(min_entropy_cells)):
                 if self.try_observe_cell(cell):
