@@ -29,9 +29,10 @@ class Cell[T_Coefficient](ABC):
     def is_collapsed(self) -> bool:
         return len(self.super_position) == 1
 
-    @abstractmethod
     def eliminate_coefficients(self, other: 'Cell[T_Coefficient]'):
-        pass
+        if other.is_collapsed():
+            super_position = self.super_position.difference(other.super_position)
+            self._set_super_position(super_position)
 
     def revert(self):
         if any(self.history):
