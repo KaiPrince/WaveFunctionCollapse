@@ -37,6 +37,25 @@ def test_solve_all_uncollapsed():
     assert wave_function[2].super_position == {3}
 
 
+def test_solve_all_uncollapsed_big():
+    # Arrange
+    states = {x for x in range(1, 10)}
+    wave_function = [MockCell(states), MockCell(states), MockCell(states), MockCell(states),
+                     MockCell(states), MockCell(states), MockCell(states), MockCell(states),
+                     MockCell(states)]
+    collapser = MockCollapser(wave_function)
+    random_provider = MockRandomProvider(lambda seq: seq[0], lambda seq: seq)
+    director = WaveFunctionCollapse(collapser, random_provider)
+
+    # Act
+    result = director.try_solve()
+
+    # Assert
+    assert result is True
+    for i in states:
+        assert wave_function[i - 1].super_position == {i}
+
+
 def test_solve_invalid():
     # Arrange
     wave_function = [MockCell({1, 2}), MockCell({1, 2}), MockCell({1, 2})]
