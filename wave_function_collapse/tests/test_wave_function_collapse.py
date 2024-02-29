@@ -1,5 +1,3 @@
-import pytest
-
 from wave_function_collapse.cell import Cell
 from wave_function_collapse.tests.mocks.mock_collapser import MockCollapser
 from wave_function_collapse.tests.mocks.mock_random_provider import MockRandomProvider
@@ -50,7 +48,7 @@ def test_solve_invalid():
     assert result is None
 
 
-def test_propogate_one_uncollapsed():
+def test_propagate_one_uncollapsed():
     # Arrange
     wave_function = [Cell({1, 2, 3}), Cell({1, 2, 3}), Cell({2})]
     collapser = MockCollapser(wave_function)
@@ -63,7 +61,7 @@ def test_propogate_one_uncollapsed():
     assert [x.super_position for x in result] == [{1, 3}, {1, 3}, {2}]
 
 
-def test_propogate_one_partially_collapsed():
+def test_propagate_one_partially_collapsed():
     # Arrange
     wave_function = [Cell({3}), Cell({1, 2, 3}), Cell({2})]
     collapser = MockCollapser(wave_function)
@@ -76,7 +74,7 @@ def test_propogate_one_partially_collapsed():
     assert [x.super_position for x in result] == [{3}, {1, 3}, {2}]
 
 
-def test_propogate_invalid():
+def test_propagate_invalid():
     # Arrange
     wave_function = [Cell({1}), Cell({1, 2, 3}), Cell({1})]
     collapser = MockCollapser(wave_function)
