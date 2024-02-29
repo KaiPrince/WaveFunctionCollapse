@@ -11,7 +11,8 @@ class MockRandomProvider(RandomProvider[Cell]):
         self.shuffle_func = shuffle_func
 
     def choice(self, seq: Sequence[Cell]) -> Cell:
-        return self.choice_func(seq)
+        result = self.choice_func(seq)
+        return result
 
     def shuffle(self, seq: Sequence[Cell]) -> Sequence[Cell]:
         return self.shuffle_func(seq)

@@ -1,5 +1,7 @@
+from functools import reduce
+
 from wave_function_collapse.cell import Cell
-from wave_function_collapse.collapser import Collapser
+from wave_function_collapse.collapser import Collapser, T_WaveFunction
 from wave_function_collapse.random_provider import RandomProvider
 
 
@@ -13,7 +15,7 @@ class WaveFunctionCollapse:
         self.collapser = collapser
         self.random_provider = random_provider
 
-    def try_solve(self) -> bool:
+    def solve(self) -> T_WaveFunction | None:
         # Initialize the wave in the completely unobserved state,
         # i.e. with all the states being possible for each element.
         wave_function = self.collapser.get_wave_function()
@@ -26,74 +28,47 @@ class WaveFunctionCollapse:
         #   Collapse this element into a definite state according to its coefficients and the distribution of NxN
         #   patterns in the input.
         # Propagation: propagate information gained on the previous observation step.
-        cell_entropies = list({cell.entropy() for cell in wave_function if not cell.is_collapsed()})
-        cell_entropies.sort()
+        while not all([x.is_collapsed() or x.is_invalid() for x in wave_function]):
+            min_entropy = min([cell.entropy() for cell in wave_function if not cell.is_collapsed()])
 
-        for entropy in cell_entropies:
+            cells = [x for x in wave_function if x.entropy() == min_entropy]
+            cell = self.random_provider.choice(cells)
 
-            cells = [x for x in wave_function if x.entropy() == entropy]
-            randomly_ordered_cells = self.random_provider.shuffle(cells)
+            collapsed_cell = cell.collapse()
+            new_wave_function = self.collapser.update_wave_function(cell, collapsed_cell, wave_function)
+            wave_function = self.propagate(collapsed_cell, new_wave_function)
 
-            for cell in randomly_ordered_cells:
-                if self.try_observe_cell(cell):
-                    if all([x.is_collapsed() for x in wave_function]):
-                        return True
+        # By now all the wave elements are either in a completely observed state (all the coefficients
+        # except one being zero) or in the contradictory state (all the coefficients being zero). In
+        # the first case return the output. In the second case finish the work without returning
+        # anything.
 
-                    if self.try_solve():
-                        # By now all the wave elements are either in a completely observed state (all the coefficients
-                        # except one being zero) or in the contradictory state (all the coefficients being zero). In
-                        # the first case return the output. In the second case finish the work without returning
-                        # anything.
-                        return True
+        if any([x.is_invalid() for x in wave_function]):
+            return None
 
-        return False
+        return wave_function
 
-    def try_observe_cell(self, cell: Cell) -> bool:
-        if cell.is_collapsed():
-            # Already collapsed
-            return True
-
-        # Collapse randomly
-        possible_states = cell.compute_possible_states()
-        for state in self.random_provider.shuffle(list(possible_states)):
-            cell.collapse(state)
-
-            if self.try_propagate(cell):
-                # Succeeded, move on
-                return True
-
-            cell.revert()
-
-        return False
-
-    def try_propagate(self, cell: Cell, visited: list[Cell] = None) -> bool:
+    def propagate(self, cell: Cell, wave_function: T_WaveFunction, visited: list[Cell] = None) -> T_WaveFunction:
         if visited is None:
             visited = []
 
-        influenced_cells = self.collapser.get_influenced_cells(cell)
-        influenced_cells_except_already_visited = [x for x in influenced_cells if all([x is not y for y in visited])]
-        rollback_cells = []
+        new_wave_function = wave_function
 
+        influenced_cells = self.collapser.get_influenced_cells(cell, wave_function)
+        influenced_cells_except_already_visited = [x for x in influenced_cells if all([x is not y for y in visited])]
+
+        pruned_cells = []
         # Breadth-first propagation
         for influenced_cell in influenced_cells_except_already_visited:
-            influenced_cell.eliminate_coefficients(cell)
+            pruned_cell = influenced_cell.eliminate_coefficients(cell)
+            if pruned_cell is not influenced_cell:
+                pruned_cells.append(pruned_cell)
+                new_wave_function = self.collapser.update_wave_function(influenced_cell, pruned_cell, new_wave_function)
 
-            if influenced_cell.is_invalid():
-                influenced_cell.revert()
-                for rollback_cell in rollback_cells:
-                    rollback_cell.revert()
-                return False
+        for pruned_cell in pruned_cells:
+            new_wave_function = self.propagate(pruned_cell, new_wave_function, [*visited, cell])
 
-            rollback_cells.append(influenced_cell)
-
-        for influenced_cell in influenced_cells_except_already_visited:
-            if not self.try_propagate(influenced_cell, [*visited, cell]):
-                influenced_cell.revert()
-                for rollback_cell in rollback_cells:
-                    rollback_cell.revert()
-                return False
-
-        return True
+        return new_wave_function
 
     def do_it(self):
         # Get all cells
