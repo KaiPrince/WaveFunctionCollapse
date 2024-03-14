@@ -6,11 +6,12 @@ from wave_function_collapse.wave_function_collapse import WaveFunctionCollapse
 
 def test_solve_all_uncollapsed():
     # Arrange
-    random_provider = MockRandomProvider(lambda seq: seq[0], lambda seq: seq)
-    wave_function = [Cell({1, 2, 3}, random_provider), Cell({1, 2, 3}, random_provider),
-                     Cell({1, 2, 3}, random_provider)]
+    cell_random_provider = MockRandomProvider(lambda seq: seq[0], lambda seq: seq)
+    int_random_provider = MockRandomProvider(lambda seq: sorted(seq)[0], lambda seq: seq)
+    wave_function = [Cell({1, 2, 3}, int_random_provider), Cell({1, 2, 3}, int_random_provider),
+                     Cell({1, 2, 3}, int_random_provider)]
     collapser = MockCollapser(wave_function)
-    director = WaveFunctionCollapse(collapser, random_provider)
+    director = WaveFunctionCollapse(collapser, cell_random_provider)
 
     # Act
     result = director.solve()
@@ -23,10 +24,11 @@ def test_solve_all_uncollapsed():
 def test_solve_all_uncollapsed_big():
     # Arrange
     states = {x for x in range(1, 10)}
-    random_provider = MockRandomProvider(lambda seq: seq[0], lambda seq: seq)
-    wave_function = [Cell(states, random_provider) for _ in range(1, 10)]
+    cell_random_provider = MockRandomProvider(lambda seq: seq[0], lambda seq: seq)
+    int_random_provider = MockRandomProvider(lambda seq: sorted(seq)[0], lambda seq: seq)
+    wave_function = [Cell(states, int_random_provider) for _ in range(1, 10)]
     collapser = MockCollapser(wave_function)
-    director = WaveFunctionCollapse(collapser, random_provider)
+    director = WaveFunctionCollapse(collapser, cell_random_provider)
 
     # Act
     result = director.solve()

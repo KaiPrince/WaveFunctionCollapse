@@ -55,14 +55,16 @@ class WaveFunctionCollapse:
         new_wave_function = wave_function
 
         influenced_cells = self.collapser.get_influenced_cells(cell, wave_function)
-        influenced_cells_except_already_visited = [x for x in influenced_cells if all([x is not y for y in visited])]
+        influenced_cells_except_already_visited = [x for x in influenced_cells if
+                                                   all([not x.is_same(y) for y in visited])]
 
         pruned_cells = []
         # Breadth-first propagation
         for influenced_cell in influenced_cells_except_already_visited:
             pruned_cell = influenced_cell.eliminate_coefficients(cell)
             if pruned_cell is not influenced_cell:
-                pruned_cells.append(pruned_cell)
+                if pruned_cell.is_collapsed():  # Optimization
+                    pruned_cells.append(pruned_cell)
                 new_wave_function = self.collapser.update_wave_function(influenced_cell, pruned_cell, new_wave_function)
 
         for pruned_cell in pruned_cells:
