@@ -1,4 +1,4 @@
-from typing import TypeVar
+from typing import TypeVar, Any
 
 from wave_function_collapse.random_provider import RandomProvider
 
@@ -11,7 +11,7 @@ class Cell[T_Coefficient]:
     super_position: T_SuperPosition
 
     def __init__(self, super_position: T_SuperPosition, random_provider: RandomProvider[T_Coefficient] = None,
-                 identifier: str = None):
+                 identifier: Any = None):
         if random_provider is None:
             random_provider = RandomProvider()
         self.random_provider = random_provider
@@ -27,7 +27,7 @@ class Cell[T_Coefficient]:
 
     def collapse(self) -> 'Cell[T_Coefficient]':
         state = self.random_provider.choice(list(self.super_position))
-        return Cell({state}, self.random_provider)
+        return Cell({state}, self.random_provider, self._identifier)
 
     def entropy(self) -> int:
         return len(self.super_position)
@@ -36,7 +36,7 @@ class Cell[T_Coefficient]:
         return not any(self.super_position)
 
     def is_collapsed(self) -> bool:
-        return len(self.super_position) == 1
+        return self.entropy() == 1
 
     def eliminate_coefficients(self, other: 'Cell[T_Coefficient]') -> 'Cell[T_Coefficient]':
         if other.is_collapsed():

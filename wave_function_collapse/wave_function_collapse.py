@@ -29,9 +29,7 @@ class WaveFunctionCollapse:
         #   patterns in the input.
         # Propagation: propagate information gained on the previous observation step.
         while not all([x.is_collapsed() or x.is_invalid() for x in wave_function]):
-            min_entropy = min([cell.entropy() for cell in wave_function if not cell.is_collapsed()])
-
-            cells = [x for x in wave_function if x.entropy() == min_entropy]
+            cells = self.collapser.find_min_entropy_cells(wave_function)
             cell = self.random_provider.choice(cells)
 
             collapsed_cell = cell.collapse()
