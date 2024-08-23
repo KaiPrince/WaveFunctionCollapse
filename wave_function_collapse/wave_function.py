@@ -4,13 +4,13 @@ from wave_function_collapse.cell import Cell
 
 
 # A WaveFunction owns the wave function and knows the relationships between cells
-class WaveFunction[T](ABC):
+class WaveFunction(ABC):
     @abstractmethod
     def find_min_entropy_cells(self) -> list[Cell]:
         pass
 
     @abstractmethod
-    def update_wave_function(self, old_cell: Cell, new_cell: Cell) -> 'WaveFunction[T]':
+    def update_wave_function(self, old_cell: Cell, new_cell: Cell) -> 'WaveFunction':
         pass
 
     @abstractmethod

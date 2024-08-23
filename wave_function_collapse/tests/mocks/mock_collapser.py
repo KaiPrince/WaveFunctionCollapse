@@ -4,7 +4,7 @@ from wave_function_collapse.wave_function import WaveFunction
 T_WaveFunction = list[Cell]
 
 
-class MockWaveFunction(WaveFunction[T_WaveFunction]):
+class MockWaveFunction(WaveFunction):
 
     def __init__(self, wave_function: T_WaveFunction):
         self.wave_function = wave_function

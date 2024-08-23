@@ -64,27 +64,3 @@ class WaveFunctionCollapse:
             current_wave_function = self.propagate(pruned_cell, current_wave_function, [*visited, cell])
 
         return current_wave_function
-
-    # def do_it(self):
-    #     # Get all cells
-    #     cells = self.wave_function.get_wave_function()
-    #
-    #     # Randomly choose among the cells with the minimum entropy
-    #     cell_entropies = {len(cell.compute_possible_states()) for cell in cells}
-    #     min_entropy = min(cell_entropies.difference({1}))  # Ignore collapsed cells
-    #     min_entropy_cells = [x for x in cells if len(x.compute_possible_states()) == min_entropy]
-    #     cell = self.random_provider.choice(min_entropy_cells)
-    #
-    #     states = cell.compute_possible_states()
-    #     for collapse_state in self.random_provider.shuffle(list(states)):
-    #         cell.collapse(collapse_state)
-    #
-    #         rollback_cells = []
-    #         for prune_cell in self.wave_function.get_influenced_cells(cell):
-    #             prune_cell.eliminate_coefficients(cell)
-    #             rollback_cells.append(prune_cell)
-    #             if prune_cell.is_invalid():
-    #                 for revert_cell in rollback_cells:
-    #                     revert_cell.revert()
-    #                 cell.revert()
-    #                 break
