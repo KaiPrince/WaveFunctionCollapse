@@ -28,8 +28,7 @@ class WaveFunctionCollapse:
             cell = self.random_provider.choice(cells)
 
             collapsed_cell = cell.collapse()
-            new_wave_function = current_wave_function.update_wave_function(cell, collapsed_cell)
-            current_wave_function = self.propagate(collapsed_cell, new_wave_function)
+            current_wave_function = current_wave_function.update_wave_function_and_propagate(cell, collapsed_cell)
 
         # By now all the wave elements are either in a completely observed state (all the coefficients
         # except one being zero) or in the contradictory state (all the coefficients being zero). In
@@ -38,29 +37,5 @@ class WaveFunctionCollapse:
 
         if current_wave_function.any_invalid():
             return None
-
-        return current_wave_function
-
-    def propagate(self, cell: Cell, wave_function: WaveFunction, visited: list[Cell] = None) -> WaveFunction:
-        if visited is None:
-            visited = []
-
-        current_wave_function = wave_function
-
-        influenced_cells = current_wave_function.get_influenced_cells(cell)
-        influenced_cells_except_already_visited = [x for x in influenced_cells if
-                                                   all([not x.is_same(y) for y in visited])]
-
-        pruned_cells = []
-        # Breadth-first propagation
-        for influenced_cell in influenced_cells_except_already_visited:
-            pruned_cell = influenced_cell.eliminate_coefficients(cell)
-            if pruned_cell is not influenced_cell:
-                if pruned_cell.is_collapsed():  # Optimization
-                    pruned_cells.append(pruned_cell)
-                current_wave_function = current_wave_function.update_wave_function(influenced_cell, pruned_cell)
-
-        for pruned_cell in pruned_cells:
-            current_wave_function = self.propagate(pruned_cell, current_wave_function, [*visited, cell])
 
         return current_wave_function
